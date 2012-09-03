@@ -11,7 +11,13 @@ module RequirejsHelper
     {}.tap do |data|
       if name
         name += ".js" unless name =~ /\.js$/
-        data['main'] = _javascript_path(name).sub(/\.js$/,'')
+
+        if name =~ /^https?:/
+          data['main'] = _javascript_path(name) + 'hest'
+        else
+          data['main'] = _javascript_path(name).sub(/\.js$/,'')
+        end
+
       end
 
       data.merge!(yield controller) if block_given?
@@ -43,7 +49,14 @@ module RequirejsHelper
 
           # Generate digestified paths from the modules spec
           paths = {}
-          modules.each { |m| paths[m] = _javascript_path(m).sub /\.js$/,'' }
+
+          modules.each do |m|
+            if m =~ /^https?:/
+               paths[m] = _javascript_path(m)
+            else
+               paths[m] = _javascript_path(m).sub(/\.js$/,'')
+            end
+          end
 
           if run_config.has_key? 'paths'
             # Add paths for assets specified by full URL (on a CDN)
